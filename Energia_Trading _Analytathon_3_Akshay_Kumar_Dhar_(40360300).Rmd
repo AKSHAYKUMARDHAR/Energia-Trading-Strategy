@@ -1,0 +1,1057 @@
+---
+title: "Untitled"
+author: "Akshay Kumar Dhar"
+date: "2023-04-28"
+output:
+  pdf_document: default
+  html_document: default
+---
+DSA 8023: Energia Trading – Analytathon 3
+Akshay Kumar Dhar (40360300)
+
+
+
+```{r warning=FALSE}
+set.seed(123)
+library(readxl)
+library(tidyr)
+library(ggplot2)
+library(patchwork)
+```
+
+
+AUthor :AKSHAY KUMAR DHAR
+```{r warning=FALSE}
+set.seed(123)
+setwd("C:\\Users\\AKSHAY KUMAR DHAR\\Downloads\\datafiles")
+GB_Prices <- read_excel("GB Prices.xlsx")
+head(GB_Prices)
+ncol(GB_Prices)
+colnames(GB_Prices)
+
+GB_Prices <- separate(GB_Prices, "Start Date Time", into = c("Start Date", "Start Time"), sep = " ")
+head(GB_Prices)
+
+```
+
+AUthor :AKSHAY KUMAR DHAR
+```{r warning=FALSE}
+set.seed(123)
+head(GB_Prices)
+
+colnames(GB_Prices)[colnames(GB_Prices) == "Start Date"] <- "StartDate"
+colnames(GB_Prices)[colnames(GB_Prices) == "Start Time"] <- "StartTime"
+colnames(GB_Prices)[colnames(GB_Prices) == "Trade Date"] <- "TradeDate"
+colnames(GB_Prices)[colnames(GB_Prices) == "GB Price (€/MWh)"] <- "GBPrice(€/MWh)"
+
+
+
+ GB_Prices$StartDate <- as.Date(GB_Prices$StartDate, format = "%d/%m/%Y")
+
+ GB_Prices$TradeDate <- as.Date(GB_Prices$TradeDate, format = "%d/%m/%Y")
+
+
+
+library(chron)
+
+
+GB_Prices$StartTime <- times(GB_Prices$StartTime)
+
+
+
+```
+
+AUthor :AKSHAY KUMAR DHAR
+```{r warning=FALSE}
+set.seed(123)
+setwd("C:\\Users\\AKSHAY KUMAR DHAR\\Downloads\\datafiles")
+gas <- read_excel("Historic Gas Prices.xlsx")
+
+
+
+
+
+library(dplyr)
+df_first_three <- slice(gas, 1:3)
+
+Historic_Gas_Prices1 <- read_excel("Historic Gas Prices.xlsx", col_types = c("date", "numeric"),skip = 3)
+Historic_Gas_Prices1$`03/01/2021` <- as.Date( Historic_Gas_Prices1$`03/01/2021`)
+
+colnames(Historic_Gas_Prices1)[colnames(Historic_Gas_Prices1) == "03/01/2021"] <- "Date"
+colnames(Historic_Gas_Prices1)[colnames(Historic_Gas_Prices1) == "57.75"] <- "Gas Price £/Therm"
+
+
+df_first_three$Date <- as.Date(df_first_three$Date, format = "%d/%m/%Y")
+
+Historic_Gas_Prices1
+df_first_three
+
+Historic_Gas_Prices <- rbind(df_first_three, Historic_Gas_Prices1)
+Historic_Gas_Prices
+
+
+colnames(Historic_Gas_Prices)[colnames(Historic_Gas_Prices) == "Gas Price £/Therm"] <- "GasPrice£/Therm"
+colnames(Historic_Gas_Prices)
+```
+
+
+AUthor :AKSHAY KUMAR DHAR
+```{r warning=FALSE}
+set.seed(123)
+setwd("C:\\Users\\AKSHAY KUMAR DHAR\\Downloads\\datafiles")
+Prices_and_NIV<-read_excel("Prices and NIV.xlsx")
+colnames(Prices_and_NIV)[colnames(Prices_and_NIV) == "Start Date"] <- "StartDate"
+colnames(Prices_and_NIV)[colnames(Prices_and_NIV) == "Trade Date"] <- "TradeDate"
+colnames(Prices_and_NIV)[colnames(Prices_and_NIV) == "Start Time 30 Minute Period"] <- "StartTime_30_Minute_Period"
+colnames(Prices_and_NIV)[colnames(Prices_and_NIV) == "DAM Market Price (€/MWh)"] <- "DAM_MarketPrice(€/MWh)"
+colnames(Prices_and_NIV)[colnames(Prices_and_NIV) == "IDA1 Market Price (€/MWh)"] <- "IDA1_MarketPrice(€/MWh)"
+colnames(Prices_and_NIV)[colnames(Prices_and_NIV) == "IDA2 Market Price (€/MWh)"] <- "IDA2_MarketPrice(€/MWh)"
+colnames(Prices_and_NIV)[colnames(Prices_and_NIV) == "IDA3 Market Price (€/MWh)"] <- "IDA3_MarketPrice(€/MWh)"
+colnames(Prices_and_NIV)[colnames(Prices_and_NIV) == "BM Market Price (€/MWh)"] <- "BM_MarketPrice(€/MWh)"
+colnames(Prices_and_NIV)[colnames(Prices_and_NIV) == "Market Net Imbalance Volume (MW)"] <- "Market_Net_ImbalanceVolume(MW)"
+
+Prices_and_NIV$StartDate <- as.Date(Prices_and_NIV$StartDate,format = "%d/%m/%Y")
+Prices_and_NIV$TradeDate <- as.Date(Prices_and_NIV$TradeDate, format = "%d/%m/%Y")
+
+Prices_and_NIV$StartTime_30_Minute_Period <- times(Prices_and_NIV$StartTime_30_Minute_Period )
+colnames(Prices_and_NIV)
+
+```
+AUthor :AKSHAY KUMAR DHAR
+```{r warning=FALSE}
+set.seed(123)
+setwd("C:\\Users\\AKSHAY KUMAR DHAR\\Downloads\\datafiles")
+Wind<-read_excel("Wind and Demand.xlsx",sheet = 1)
+colnames(Wind)[colnames(Wind) == "Start Date"] <- "StartDate"
+colnames(Wind)[colnames(Wind) == "Trade Date"] <- "TradeDate"
+colnames(Wind)[colnames(Wind) == "Start Time 30 Minute Period"] <- "StartTime_30_Minute_Period"
+
+Wind$StartDate <- as.Date(Wind$StartDate,format = "%d/%m/%Y")
+Wind$TradeDate <- as.Date(Wind$TradeDate, format = "%d/%m/%Y")
+
+Wind$StartTime_30_Minute_Period <- times(Wind$StartTime_30_Minute_Period )
+colnames(Wind)
+
+```
+AUthor :AKSHAY KUMAR DHAR
+```{r warning=FALSE}
+set.seed(123)
+setwd("C:\\Users\\AKSHAY KUMAR DHAR\\Downloads\\datafiles")
+Demand<-read_excel("Wind and Demand.xlsx",sheet = 2)
+colnames(Demand)[colnames(Demand) == "Start Date"] <- "StartDate"
+colnames(Demand)[colnames(Demand) == "Trade Date"] <- "TradeDate"
+colnames(Demand)[colnames(Demand) == "Start Time 30 Minute Period"] <- "StartTime_30_Minute_Period"
+colnames(Demand)[colnames(Demand) == "Demand (MW)"] <- "Demand_per_MW"
+
+Demand$StartDate <- as.Date(Demand$StartDate,format = "%d/%m/%Y")
+Demand$TradeDate <- as.Date(Demand$TradeDate, format = "%d/%m/%Y")
+
+Demand$StartTime_30_Minute_Period <- times(Demand$StartTime_30_Minute_Period )
+colnames(Demand)
+
+
+sum(Demand$Demand_per_MW == 0)
+Demand <- Demand[!Demand$Demand_per_MW == 0, ]
+
+```
+AUthor :AKSHAY KUMAR DHAR
+```{r warning=FALSE}
+set.seed(123)
+GB_Prices
+Historic_Gas_Prices
+Prices_and_NIV
+Wind
+Demand
+
+```
+
+
+
+AUthor :AKSHAY KUMAR DHAR
+```{r warning=FALSE}
+set.seed(123)
+setwd("C:\\Users\\AKSHAY KUMAR DHAR\\Downloads\\datafiles")
+Prices_and_NIV1<-read_excel("Prices and NIV.xlsx")
+
+colnames(Prices_and_NIV1)[colnames(Prices_and_NIV1) == "Start Date"] <- "StartDate"
+colnames(Prices_and_NIV1)[colnames(Prices_and_NIV1) == "Trade Date"] <- "TradeDate"
+colnames(Prices_and_NIV1)[colnames(Prices_and_NIV1) == "Start Time 30 Minute Period"] <- "StartTime_30_Minute_Period"
+colnames(Prices_and_NIV1)[colnames(Prices_and_NIV1) == "DAM Market Price (€/MWh)"] <- "DAM_MarketPrice(€/MWh)"
+colnames(Prices_and_NIV1)[colnames(Prices_and_NIV1) == "IDA1 Market Price (€/MWh)"] <- "IDA1_MarketPrice(€/MWh)"
+colnames(Prices_and_NIV1)[colnames(Prices_and_NIV1) == "IDA2 Market Price (€/MWh)"] <- "IDA2_MarketPrice(€/MWh)"
+colnames(Prices_and_NIV1)[colnames(Prices_and_NIV1) == "IDA3 Market Price (€/MWh)"] <- "IDA3_MarketPrice(€/MWh)"
+colnames(Prices_and_NIV1)[colnames(Prices_and_NIV1) == "BM Market Price (€/MWh)"] <- "BM_MarketPrice(€/MWh)"
+colnames(Prices_and_NIV1)[colnames(Prices_and_NIV1) == "Market Net Imbalance Volume (MW)"] <- "Market_Net_ImbalanceVolume(MW)"
+
+
+
+```
+
+
+AUthor :AKSHAY KUMAR DHAR
+```{r warning=FALSE}
+set.seed(123)
+
+
+ALL_data <- Prices_and_NIV %>%
+  left_join(GB_Prices, by = c("StartDate", "TradeDate","StartTime_30_Minute_Period" = "StartTime")) %>%
+  left_join(Historic_Gas_Prices, by = c("TradeDate" = "Date")) %>%
+  left_join(Wind, by = c("TradeDate", "StartDate", "StartTime_30_Minute_Period")) %>% 
+  left_join(Demand, by = c("TradeDate", "StartDate", "StartTime_30_Minute_Period"))
+
+ALL_data <- ALL_data %>%
+  mutate(Tradedate_time = as.POSIXct(paste(TradeDate, StartTime_30_Minute_Period)))
+
+ALL_data$half_hour_market_price_sum <- rowSums(ALL_data[, c("DAM_MarketPrice(€/MWh)", "IDA1_MarketPrice(€/MWh)", "IDA2_MarketPrice(€/MWh)", "IDA3_MarketPrice(€/MWh)", "BM_MarketPrice(€/MWh)")],na.rm = TRUE)
+ 
+
+# Density plot
+plot(density(ALL_data$half_hour_market_price_sum), main = "Density Plot of Cumulative Market Price")
+
+
+colnames(ALL_data)[colnames(ALL_data) == "DAM_MarketPrice(€/MWh)"] <- "DAM_MarketPrice"
+colnames(ALL_data)[colnames(ALL_data) =="IDA1_MarketPrice(€/MWh)" ] <- "IDA1_MarketPrice"
+colnames(ALL_data)[colnames(ALL_data) =="IDA2_MarketPrice(€/MWh)" ] <- "IDA2_MarketPrice"
+colnames(ALL_data)[colnames(ALL_data) =="IDA3_MarketPrice(€/MWh)" ] <- "IDA3_MarketPrice"
+colnames(ALL_data)[colnames(ALL_data) =="BM_MarketPrice(€/MWh)" ] <- "BM_MarketPrice"
+colnames(ALL_data)[colnames(ALL_data) == "GBPrice(€/MWh)"] <- "GBPrice_per_MWh"
+colnames(ALL_data)[colnames(ALL_data) == "GasPrice£/Therm"] <- "GasPrice_Therm"
+colnames(ALL_data)[colnames(ALL_data) == "Actual Wind (MW)"] <- "ActualWind_per_MW"
+
+
+
+ALL_data$Net_Demand <- ALL_data$Demand_per_MW - ALL_data$ActualWind_per_MW
+
+sum(is.na(ALL_data$Net_Demand))
+
+ALL_data <- ALL_data[!is.na(ALL_data$Net_Demand), ]
+
+ALL_data$ profitability_of_IDA1 <-   ((ALL_data$DAM_MarketPrice - ALL_data$IDA1_MarketPrice)*100)/2
+
+ALL_data$ profitability_of_IDA2 <-   ((ALL_data$DAM_MarketPrice - ALL_data$IDA2_MarketPrice)*100)/2
+  
+ALL_data$ profitability_of_IDA3 <-   ((ALL_data$DAM_MarketPrice - ALL_data$IDA3_MarketPrice)*100)/2
+
+ALL_data$ profitability_of_BM <-  round( ((ALL_data$DAM_MarketPrice - ALL_data$BM_MarketPrice)*100)/2,1)
+
+
+```
+
+```{r warning=FALSE}
+set.seed(123)
+library(ggplot2)
+
+
+c1<-ggplot(ALL_data, aes(x=TradeDate, y=GBPrice_per_MWh)) + 
+  geom_line(color="#CF5E85") + 
+  ggtitle("Trends in GB Electricity Price")
+
+
+c2<-ggplot(ALL_data, aes(x=StartDate, y=GasPrice_Therm)) + 
+  geom_line(color="#2E9DA4") + 
+  ggtitle("Trends in Daily Gas Price")
+
+
+(c1/c2)+plot_layout(ncol=1,nrow=2)
+
+ggplot(data = ALL_data, aes(x = GBPrice_per_MWh, y = GasPrice_Therm)) +
+  geom_point(size = 0.85, color = "#2EA9AF") +
+  geom_smooth(method = "lm", se = FALSE, color = "black") + 
+  ggtitle(paste0("Correlation between GB Price and Gas Price: ", round(cor(ALL_data$GBPrice_per_MWh, ALL_data$GasPrice_Therm), 2)))
+
+
+
+
+
+
+
+
+
+
+ggplot(ALL_data, aes(x=StartDate)) + 
+  geom_line(aes(y=ActualWind_per_MW, color="Wind Output"))+
+  ggtitle("Trends in Wind Output") 
+
+ggplot(ALL_data, aes(x=StartDate)) + 
+  geom_line(aes(y=Net_Demand, color="NET Demand")) + 
+  ggtitle("Trends in Net Demand") 
+
+
+
+
+
+p1<-ggplot(ALL_data, aes(x=StartDate)) + 
+  geom_line(aes(y=ActualWind_per_MW, color="Wind Output")) + 
+  geom_line(aes(y=Net_Demand, color="NET Demand")) + 
+  ggtitle("Trends in Wind Output and Demand") 
+
+
+
+
+
+
+
+
+# Create the plot
+p2<-ggplot(data = ALL_data, aes(x = ActualWind_per_MW, y = Net_Demand)) +
+  geom_point(size = 0.85, color = "#EC91DE") +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  ggtitle(paste0("Correlation between Wind and Net Demand: ", round(cor(ALL_data$ActualWind_per_MW, ALL_data$Net_Demand), 2)))
+
+
+library(patchwork)
+(p1/p2)+plot_layout(ncol=1,nrow=2)
+
+
+```
+
+AUthor :AKSHAY KUMAR DHAR
+```{r warning=FALSE}
+set.seed(123)
+markets <- c("Market IdA1", "Market IDA2", "Market IDA3","Market BM")
+
+Profitability  <- c(mean(ALL_data$profitability_of_IDA1,na.rm = TRUE), mean(ALL_data$profitability_of_IDA2,na.rm = TRUE), mean(ALL_data$profitability_of_IDA3,na.rm = TRUE),mean(ALL_data$profitability_of_BM,na.rm = TRUE))
+
+df <- data.frame(markets, Profitability )
+
+ggplot(df, aes(x = reorder(markets, -Profitability), y = Profitability, fill = markets)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Markets", y = "Profitability") +
+  theme_minimal() +
+  scale_fill_manual(values = c("#F8766D", "#7CAE00", "#00BFC4", "#F581EA"))
+
+
+
+
+
+library(tidyr)
+library(ggplot2)
+
+```
+```{r warning=FALSE}
+set.seed(123)
+b1<-ggplot(ALL_data, aes(x=StartDate)) + 
+  geom_line(aes(y=BM_MarketPrice, color="BM Market Price")) + 
+  geom_line(aes(y=`Market_Net_ImbalanceVolume(MW)`, color="Market Net Imbalance Volume (MW)")) + 
+  scale_color_manual(values=c("#E7430F", "#3D82A2")) +
+  ggtitle("Trends in  BM market price and Market Imblance") +
+  labs(x = "Date", y = "Price/Volume") +
+  theme(legend.position = "bottom")
+
+
+
+
+
+
+
+
+b2<-ggplot(data = ALL_data, aes(x = BM_MarketPrice, y = `Market_Net_ImbalanceVolume(MW)`)) +
+  geom_point(size = 0.85, color = "#2EA9AF") +
+  geom_smooth(method = "lm", se = FALSE, color = "black") + # add color argument
+  ggtitle(paste0("Correlation between BM market price and Market Imblance: ", round(cor(ALL_data$BM_MarketPrice, ALL_data$`Market_Net_ImbalanceVolume(MW)`), 2)))
+
+
+trend <- data.frame(values = ALL_data$`Market_Net_ImbalanceVolume(MW)`)
+trend$direction <- ifelse(trend$values >= 0, "Positive", "Negative")
+
+trend$x <- seq_along(trend$values)
+
+# Plot the data
+b3<-ggplot(trend, aes(x = x, y = values, color = direction, group = 1)) +
+  geom_line() +
+  scale_color_manual(values = c("Positive" = "#5DADE2", "Negative" = "#E74C3C")) +
+  theme_minimal() +
+  labs(x = "Index", y = "Value") +
+  ggtitle("Plot of Market Net Imbalance Volume per MW")
+
+
+
+
+(b1/b3)+plot_layout(ncol=1,nrow=2)
+
+plot(b2)
+```
+
+
+
+
+
+
+
+
+AUthor :AKSHAY KUMAR DHAR
+```{r warning=FALSE}
+
+set.seed(123)
+library(forecast)
+library(ggplot2)
+
+
+prices <- ALL_data[, c("TradeDate", "StartDate","StartTime_30_Minute_Period", "DAM_MarketPrice","IDA1_MarketPrice","IDA2_MarketPrice","IDA3_MarketPrice","BM_MarketPrice","GBPrice_per_MWh","Market_Net_ImbalanceVolume(MW)","GasPrice_Therm","ActualWind_per_MW","Net_Demand")]
+
+
+prices <- prices %>%
+  mutate(Tradedate_time = as.POSIXct(paste(TradeDate, StartTime_30_Minute_Period)))
+
+
+
+
+ts_data <- prices[, c("Tradedate_time","DAM_MarketPrice","IDA1_MarketPrice","IDA2_MarketPrice","IDA3_MarketPrice","BM_MarketPrice","Market_Net_ImbalanceVolume(MW)","GBPrice_per_MWh","GasPrice_Therm","ActualWind_per_MW","Net_Demand")]
+
+
+ts_data_BM <- ts(ts_data$BM_MarketPrice,start=c(2021,12,31), frequency=48)
+ts_data_DAM <- ts(ts_data$DAM_MarketPrice, start=c(2021,12,31), frequency=48)
+ts_data_DM1 <- ts(ts_data$IDA1_MarketPrice,start=c(2021,12,31), frequency=48)
+
+
+
+
+stl_decomp_BM <- stl(ts_data_BM, s.window="periodic")
+stl_decomp_DAM <- stl(ts_data_DAM, s.window="periodic")
+stl_decomp_DM1 <- stl(ts_data_DM1, s.window="periodic")
+
+
+
+autoplot(stl_decomp_BM) +
+  ggtitle(" BM Market Price")
+autoplot(stl_decomp_DAM)+
+  ggtitle(" DM Market Price")
+autoplot(stl_decomp_DM1)+
+  ggtitle(" DM1 Market Price")
+
+
+
+
+fit_BM <- stlf(stl_decomp_BM$time.series[, "remainder"])
+fit_DM <- stlf(stl_decomp_DAM$time.series[, "remainder"])
+fit_DM1 <- stlf(stl_decomp_DM1$time.series[, "remainder"])
+
+
+
+forecasted_values_BM <- forecast(fit_BM, h=48, level=c(80, 95), fan=FALSE)
+forecasted_values_DAM <- forecast(fit_DM, h=48, level=c(80, 95), fan=FALSE)
+forecasted_values_DM1 <- forecast(fit_DM1, h=48, level=c(80, 95), fan=FALSE)
+
+
+autoplot(forecasted_values_DAM$mean) +
+  ggtitle("Forecast of DM Market Price (€/MWh)") +
+  ylab("Price (€/MWh)") +
+  xlab("Time")
+
+autoplot(forecasted_values_DM1$mean) +
+  ggtitle("Forecast of IDA Market Price (€/MWh)") +
+  ylab("Price (€/MWh)") +
+  xlab("Time")
+
+
+autoplot(forecasted_values_BM$mean) +
+  ggtitle("Forecast of BM Market Price (€/MWh)") +
+  ylab("Price (€/MWh)") +
+  xlab("Time")
+
+print(forecasted_values_DAM)
+print(forecasted_values_DM1)
+print(forecasted_values_BM)
+
+
+
+
+# Point.Forecast: the point forecasted values for each future time point
+# Lo.80: the lower bound of the 80% prediction interval for each forecasted value
+# Hi.80: the upper bound of the 80% prediction interval for each forecasted value
+# Lo.95: the lower bound of the 95% prediction interval for each forecasted value
+# Hi.95: the upper bound of the 95% prediction interval for each forecasted value
+# The number of rows in the dataframe corresponds to the number of forecasted time points, which is determined by the h parameter in the forecast() function. In this case, it is set to 48, indicating that 48 future time points are being forecasted.
+
+
+```
+
+Forecast of IDA2 Market Price (€/MWh)
+AUthor :AKSHAY KUMAR DHAR
+```{r warning=FALSE}
+set.seed(123)
+ALL_data1<-ALL_data[!is.na(ALL_data$IDA2_MarketPrice),]
+
+prices1 <- ALL_data1[, c("TradeDate", "StartDate","StartTime_30_Minute_Period", "DAM_MarketPrice","IDA1_MarketPrice","IDA2_MarketPrice","IDA3_MarketPrice","BM_MarketPrice","GBPrice_per_MWh","Market_Net_ImbalanceVolume(MW)","GasPrice_Therm","ActualWind_per_MW","Net_Demand")]
+prices1 <- prices1 %>%
+  mutate(Tradedate_time = as.POSIXct(paste(TradeDate, StartTime_30_Minute_Period)))
+
+ts_data1 <- prices1[, c("Tradedate_time","DAM_MarketPrice","IDA1_MarketPrice","IDA2_MarketPrice","IDA3_MarketPrice","BM_MarketPrice","Market_Net_ImbalanceVolume(MW)","GBPrice_per_MWh","GasPrice_Therm","ActualWind_per_MW","Net_Demand")]
+
+ts_data_IDA2 <- ts(ts_data1$IDA2_MarketPrice, start= c(2021, 01,01) , frequency=48)
+
+
+stl_decomp_IDA2 <- stl(ts_data_IDA2, s.window="periodic")
+
+autoplot(stl_decomp_IDA2)+
+  ggtitle(" IDA2 Market Price")
+
+
+fit_IDA2 <- stlf(stl_decomp_IDA2$time.series[, "remainder"])
+
+
+forecasted_values_IDA2 <- forecast(fit_IDA2, h=24, level=c(80, 95), fan=FALSE)
+
+autoplot(forecasted_values_IDA2$mean) +
+  ggtitle("Forecast of IDA2 Market Price (€/MWh)") +
+  ylab("Price (€/MWh)") +
+  xlab("Time")
+
+
+
+```
+Forecast of IDA3 Market Price (€/MWh)
+AUthor :AKSHAY KUMAR DHAR
+```{r warning=FALSE}
+set.seed(123)
+ALL_data2<-ALL_data[!is.na(ALL_data$IDA3_MarketPrice),]
+
+prices2 <- ALL_data2[, c("TradeDate", "StartDate","StartTime_30_Minute_Period", "DAM_MarketPrice","IDA1_MarketPrice","IDA2_MarketPrice","IDA3_MarketPrice","BM_MarketPrice","GBPrice_per_MWh","Market_Net_ImbalanceVolume(MW)","GasPrice_Therm","ActualWind_per_MW","Net_Demand")]
+
+prices2 <- prices2 %>%
+  mutate(Tradedate_time = as.POSIXct(paste(TradeDate, StartTime_30_Minute_Period)))
+
+ts_data2 <- prices2[, c("Tradedate_time","DAM_MarketPrice","IDA1_MarketPrice","IDA2_MarketPrice","IDA3_MarketPrice","BM_MarketPrice","Market_Net_ImbalanceVolume(MW)","GBPrice_per_MWh","GasPrice_Therm","ActualWind_per_MW","Net_Demand")]
+
+ts_data_IDA3 <- ts(ts_data2$IDA3_MarketPrice,start=c(2021, 01,01), frequency=48)
+
+
+stl_decomp_IDA3 <- stl(ts_data_IDA3, s.window="periodic")
+autoplot(stl_decomp_IDA3)+
+  ggtitle(" IDA3 Market Price")
+
+
+fit_IDA3 <- stlf(stl_decomp_IDA3$time.series[, "remainder"])
+
+
+forecasted_values_IDA3 <- forecast(fit_IDA3, h=12, level=c(80, 95), fan=FALSE)
+
+autoplot(forecasted_values_IDA3$mean) +
+  ggtitle("Forecast of IDA3 Market Price (€/MWh)") +
+  ylab("Price (€/MWh)") +
+  xlab("Time")
+
+
+
+```
+
+
+plots 
+```{r warning=FALSE}
+set.seed(123)
+
+
+
+
+
+p1<-autoplot(stl_decomp_BM$time.series[, 3]) +
+  ggtitle("BM Market reminder") +
+  theme(plot.title = element_text(color = "black")) +
+  theme(panel.background = element_rect(fill = "lightblue"))
+
+p2<-autoplot(stl_decomp_DAM$time.series[, 3]) +
+  ggtitle(" DAM Market reminder") +
+  theme(plot.title = element_text(color = "black")) +
+  theme(panel.background = element_rect(fill = "lightblue"))
+
+p3<-autoplot(stl_decomp_DM1$time.series[, 3]) +
+  ggtitle("IDA1 Market reminder") +
+  theme(plot.title = element_text(color = "black")) +
+  theme(panel.background = element_rect(fill = "lightblue"))
+
+p4<-autoplot(stl_decomp_IDA2$time.series[, 3]) +
+  ggtitle(" IDA2 Market reminder") +
+  theme(plot.title = element_text(color = "black")) +
+  theme(panel.background = element_rect(fill = "lightblue"))
+
+p5<-autoplot(stl_decomp_IDA3$time.series[, 3]) +
+  ggtitle("IDA3 Market reminder") +
+  theme(plot.title = element_text(color = "black")) +
+  theme(panel.background = element_rect(fill = "lightblue"))
+
+
+(p1/p2)+plot_layout(ncol=2,nrow=1)
+(p3/p4/p5)+plot_layout(ncol=3,nrow=1)
+
+```
+
+
+AUthor :AKSHAY KUMAR DHAR
+
+we are fitting a Vector Autoregression (VAR) model to a multivariate time series object 
+The VAR model is a type of time series model that extends the univariate Autoregressive Integrated Moving Average (ARIMA) model to the multivariate case. It assumes that each variable in the time series is influenced by its own past values, as well as the past values of the other variables in the system. By estimating the coefficients of the VAR model, we can identify the relationships and interactions between the variables over time.
+
+```{r warning=FALSE}
+set.seed(123)
+library(vars)
+library(forecast)
+
+data_BM <- data.frame(ts_data$BM_MarketPrice,ts_data$GBPrice_per_MWh,ts_data$GasPrice_Therm,ts_data$ActualWind_per_MW,ts_data$Net_Demand,ts_data$`Market_Net_ImbalanceVolume(MW)`)                                                                                                                                                
+
+
+ts_data_BM <- ts(data_BM, start=c(2021, 12,31), frequency = 48)
+
+#identifying the lag oder for BM market 
+
+data_matrix1 <- as.matrix(ts_data_BM)
+pacf_results1 <- apply(data_matrix1, 2, function(x) pacf(x)$acf)
+plot(pacf_results1[, 1], type = "h", main = "Partial Autocorrelation Function (PACF)", xlab = "Lag", ylab = "PACF")
+# Identify significant spikes using a threshold (e.g., 95% confidence interval)
+threshold1 <- 1.96 / sqrt(nrow(data_matrix1))  # 95% confidence interval for sample size 'n'
+significant_lags1 <- which(abs(pacf_results1[, 1]) > threshold1)
+
+# Determine the lag order based on the significant spikes
+lag_order1 <- max(significant_lags1)
+
+# Print the lag order
+print(lag_order1)
+
+
+
+
+
+
+
+
+plot(data_BM$ts_data.BM_MarketPrice, type = "l", col = "blue", 
+     main = "BM Market ", 
+     xlab = "Time", ylab = "Price")
+
+
+
+
+
+model_BM <- VAR(ts_data_BM, p = 45)
+
+
+forecast_BM <- predict(model_BM, n.ahead = 48)
+
+
+
+print(forecast_BM$fcst$ts_data.BM_MarketPrice)
+
+forecast_BM_dataframe<- as.data.frame(forecast_BM$fcst$ts_data.BM_MarketPrice)
+
+forecast_BM_dataframe <- forecast_BM_dataframe %>% 
+  mutate(Time= prices$StartTime_30_Minute_Period[1:48])
+
+
+plot(forecast_BM_dataframe$fcst, type = "l", col = "blue", 
+     main = "Forecasted Values For BM Market ", 
+     xlab = "Time", ylab = "Price", xaxt="n")
+axis(1, at=1:nrow(forecast_BM_dataframe), labels=forecast_BM_dataframe$Time)
+
+```
+
+
+
+
+
+
+
+
+
+AUthor :AKSHAY KUMAR DHAR
+```{r warning=FALSE}
+set.seed(123)
+library(vars)
+library(forecast)
+
+data_DAM <- data.frame(ts_data$DAM_MarketPrice, ts_data$GBPrice_per_MWh, ts_data$GasPrice_Therm,ts_data$ActualWind_per_MW,ts_data$Net_Demand)
+
+
+
+ts_data_DAM <- ts(data_DAM, start=c(2021, 12,31), frequency = 48)
+
+
+#identifying the lag oder for DAM market 
+data_matrix2 <- as.matrix(ts_data_DAM)
+pacf_results2 <- apply(data_matrix2, 2, function(x) pacf(x)$acf)
+plot(pacf_results2[, 1], type = "h", main = "Partial Autocorrelation Function (PACF)", xlab = "Lag", ylab = "PACF")
+# Identify significant spikes using a threshold (e.g., 95% confidence interval)
+threshold2 <- 1.96 / sqrt(nrow(data_matrix2))  # 95% confidence interval for sample size 'n'
+significant_lags2 <- which(abs(pacf_results2[, 1]) > threshold2)
+
+# Determine the lag order based on the significant spikes
+lag_order2 <- max(significant_lags2)
+
+# Print the lag order
+print(lag_order2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+plot(data_DAM$ts_data.DAM_MarketPrice, type = "l", col = "blue", 
+     main = "DAM Market ", 
+     xlab = "Time", ylab = "Price")
+
+
+
+model_DAM <- VAR(ts_data_DAM, p = 45)
+
+
+forecast_DAM <- predict(model_DAM, n.ahead = 48)
+
+
+
+
+
+
+
+
+
+
+
+forecast_DAM$fcst$ts_data.DAM_MarketPrice
+
+forecast_DAM_dataframe<- as.data.frame(forecast_DAM$fcst$ts_data.DAM_MarketPrice)
+
+forecast_DAM_dataframe <- forecast_DAM_dataframe %>% 
+  mutate(Time= prices$StartTime_30_Minute_Period[25:72])
+
+
+plot(forecast_DAM_dataframe$fcst, type = "l", col = "blue", 
+     main = "Forecasted Values For DAM Market ", 
+     xlab = "Time", ylab = "Price", xaxt="s",xaxt="n")
+axis(1, at=1:nrow(forecast_DAM_dataframe), labels=forecast_DAM_dataframe$Time,cex.axis = 0.7, las = 2)
+
+
+
+
+```
+
+
+
+
+
+
+
+AUthor :AKSHAY KUMAR DHAR
+```{r warning=FALSE}
+set.seed(123)
+library(vars)
+library(forecast)
+
+data_IDA1 <- data.frame(ts_data$IDA1_MarketPrice, ts_data$GBPrice_per_MWh, ts_data$GasPrice_Therm,ts_data$ActualWind_per_MW,ts_data$Net_Demand)
+
+
+
+ts_data_IDA1 <- ts(data_IDA1,start=c(2021, 12,31), frequency = 48)
+
+
+#identifying the lag oder for IDA1 market 
+data_matrix3 <- as.matrix(ts_data_IDA1)
+pacf_results3 <- apply(data_matrix3, 2, function(x) pacf(x)$acf)
+plot(pacf_results3[, 1], type = "h", main = "Partial Autocorrelation Function (PACF)", xlab = "Lag", ylab = "PACF")
+# Identify significant spikes using a threshold (e.g., 95% confidence interval)
+threshold3 <- 1.96 / sqrt(nrow(data_matrix3))  # 95% confidence interval for sample size 'n'
+significant_lags3 <- which(abs(pacf_results3[, 1]) > threshold3)
+
+# Determine the lag order based on the significant spikes
+lag_order3 <- max(significant_lags3)
+
+# Print the lag order
+print(lag_order3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+plot(data_IDA1$ts_data.IDA1_MarketPrice, type = "l", col = "blue", 
+     main = "IDA1 Market ", 
+     xlab = "Time", ylab = "Price")
+
+
+model_IDA1 <- VAR(ts_data_IDA1, p = 45)
+
+
+
+
+forecast_IDA1 <- predict(model_IDA1, n.ahead = 48)
+
+
+forecast_IDA1$fcst$ts_data.IDA1_MarketPrice
+
+
+forecast_IDA1_dataframe<- as.data.frame(forecast_IDA1$fcst$ts_data.IDA1_MarketPrice)
+
+forecast_IDA1_dataframe <- forecast_IDA1_dataframe %>% 
+  mutate(Time= prices$StartTime_30_Minute_Period[38:85])
+
+
+plot(forecast_IDA1_dataframe$fcst, type = "l", col = "blue", 
+     main = "Forecasted Values For IDA1 Market ", 
+     xlab = "Time", ylab = "Price",xaxt="s", xaxt="n")
+axis(1, at=1:nrow(forecast_IDA1_dataframe), labels=forecast_IDA1_dataframe$Time,cex.axis = 0.7, las = 2)
+
+
+```
+
+AUthor :AKSHAY KUMAR DHAR
+#code here 
+```{r warning=FALSE}
+set.seed(123)
+library(vars)
+library(forecast)
+
+
+data_IDA2 <- data.frame(ts_data1$IDA2_MarketPrice, ts_data1$GBPrice_per_MWh, ts_data1$GasPrice_Therm,ts_data1$ActualWind_per_MW,ts_data1$Net_Demand)
+
+
+
+ts_data_IDA2 <- ts(data_IDA2,start=c(2021, 01,01), frequency = 48)
+
+
+#identifying the lag oder for IDA2 market 
+data_matrix4 <- as.matrix(ts_data_IDA2)
+pacf_results4 <- apply(data_matrix4, 2, function(x) pacf(x)$acf)
+plot(pacf_results4[, 1], type = "h", main = "Partial Autocorrelation Function (PACF)", xlab = "Lag", ylab = "PACF")
+# Identify significant spikes using a threshold (e.g., 95% confidence interval)
+threshold4 <- 1.96 / sqrt(nrow(data_matrix4))  # 95% confidence interval for sample size 'n'
+significant_lags4 <- which(abs(pacf_results4[, 1]) > threshold4)
+
+# Determine the lag order based on the significant spikes
+lag_order4 <- max(significant_lags4)
+
+# Print the lag order
+print(lag_order4)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+plot(data_IDA2$ts_data1.IDA2_MarketPrice, type = "l", col = "blue", 
+     main = "IDA2 Market ", 
+     xlab = "Time", ylab = "Price")
+
+
+model_IDA2 <- VAR(ts_data_IDA2, p = 42)
+
+
+
+
+forecast_IDA2 <- predict(model_IDA2, n.ahead = 24)
+
+
+
+forecast_IDA2$fcst$ts_data1.IDA2_MarketPrice
+
+
+forecast_IDA2_dataframe<- as.data.frame(forecast_IDA2$fcst$ts_data1.IDA2_MarketPrice)
+
+forecast_IDA2_dataframe <- forecast_IDA2_dataframe %>% 
+  mutate(Time= prices1$StartTime_30_Minute_Period[1:24])
+
+
+plot(forecast_IDA2_dataframe$fcst, type = "l", col = "blue", 
+     main = "Forecasted Values For IDA2 Market ", 
+     xlab = "Time", ylab = "Price",xaxt = "s", xaxt="n")
+axis(1, at=1:nrow(forecast_IDA2_dataframe), labels=forecast_IDA2_dataframe$Time,cex.axis = 0.7, las = 2)
+
+
+
+```
+
+
+
+AUthor :AKSHAY KUMAR DHAR
+```{r warning=FALSE}
+set.seed(123)
+library(vars)
+library(forecast)
+
+
+data_IDA3 <- data.frame(ts_data2$IDA3_MarketPrice, ts_data2$GBPrice_per_MWh, ts_data2$GasPrice_Therm,ts_data2$ActualWind_per_MW,ts_data2$Net_Demand)
+
+
+
+ts_data_IDA3 <- ts(data_IDA3,start=c(2021, 01,01), frequency = 48)
+
+
+data_matrix5 <- as.matrix(ts_data_IDA3)
+pacf_results5<- apply(data_matrix5, 2, function(x) pacf(x)$acf)
+plot(pacf_results5[, 1], type = "h", main = "Partial Autocorrelation Function (PACF)", xlab = "Lag", ylab = "PACF")
+# Identify significant spikes using a threshold (e.g., 95% confidence interval)
+threshold5<- 1.96 / sqrt(nrow(data_matrix5))  # 95% confidence interval for sample size 'n'
+significant_lags5 <- which(abs(pacf_results5[, 1]) > threshold5)
+
+# Determine the lag order based on the significant spikes
+lag_order5 <- max(significant_lags5)
+
+# Print the lag order
+print(lag_order5)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+plot(data_IDA3$ts_data2.IDA3_MarketPrice, type = "l", col = "blue", 
+     main = "IDA3 Market ", 
+     xlab = "Time", ylab = "Price")
+
+
+model_IDA3 <- VAR(ts_data_IDA3, p = 37)
+
+
+
+forecast_IDA3 <- predict(model_IDA3, n.ahead = 12)
+
+
+
+forecast_IDA3$fcst$ts_data2.IDA3_MarketPrice
+
+
+forecast_IDA3_dataframe<- as.data.frame(forecast_IDA3$fcst$ts_data2.IDA3_MarketPrice)
+
+forecast_IDA3_dataframe <- forecast_IDA3_dataframe %>% 
+  mutate(Time= prices2$StartTime_30_Minute_Period[1:12])
+
+
+
+
+
+
+
+plot(forecast_IDA3_dataframe$fcst, type = "l", col = "blue", 
+     main = "Forecasted Values For IDA3 Market", 
+     xlab = "Time", ylab = "Price", xaxt = "s",xaxt="n")
+axis(1, at = 1:nrow(forecast_IDA3_dataframe), labels = forecast_IDA3_dataframe$Time, cex.axis = 0.7, las = 2)
+
+
+
+
+
+
+
+```
+
+
+AUthor :AKSHAY KUMAR DHAR
+
+
+
+```{r warning=FALSE}
+set.seed(123)
+colnames(ALL_data)
+
+```
+
+
+
+AUthor :AKSHAY KUMAR DHAR
+```{r warning=FALSE}
+
+set.seed(123)
+
+BM<-subset(forecast_BM_dataframe,select = c(fcst,Time))
+
+  
+DAM <- subset(forecast_DAM_dataframe,select = c(fcst,Time))
+
+
+
+IDA1<-subset( forecast_IDA1_dataframe,select = c(fcst,Time))
+IDA2<-subset( forecast_IDA2_dataframe, select =  c(fcst,Time)) 
+IDA3 <-subset( forecast_IDA3_dataframe , select =  c(fcst,Time)) 
+
+colnames(BM)[colnames(BM) == "fcst"] <- "BM Market"
+colnames(DAM)[colnames(DAM) == "fcst"] <- "DAM Market"
+colnames(IDA1)[colnames(IDA1) == "fcst"] <- "IDA1 Market"
+colnames(IDA2)[colnames(IDA2) == "fcst"] <- "IDA2 Market"
+colnames(IDA3)[colnames(IDA3) == "fcst"] <- "IDA3 Market"
+
+
+merged_df <- merge(BM, DAM, by = "Time",all.x = TRUE)
+merged_df <- merge(merged_df, IDA1, by = "Time",all.x = TRUE)
+merged_df <- merge(merged_df, IDA2, by = "Time",all.x = TRUE)
+merged_df <- merge(merged_df, IDA3, by = "Time",all.x = TRUE)
+
+merged_df
+
+
+```
+
+
+Author :AKSHAY KUMAR DHAR
+```{r warning=FALSE}
+set.seed(123)
+library(ggplot2)
+merged_df$Minimum_Market <- apply(merged_df[2:6], 1, min, na.rm = TRUE)
+merged_df$Market <- apply(merged_df[2:6], 1, function(x) {
+  colnames(merged_df)[which.min(x)+1]  # Add 1 to index to account for 'Country' column
+})
+
+ggplot(merged_df,aes(x=Market,fill=Market))+geom_bar()+ ggtitle("Minimum Market count")
+
+```
+
+AUthor :AKSHAY KUMAR DHAR
+```{r warning=FALSE}
+set.seed(123)
+library(ggplot2)
+library(reshape2)
+
+ggplot(melt(table(merged_df$Time, merged_df$Market)), aes(x=Var1, y=Var2, fill=value)) +
+  geom_tile() +
+  scale_fill_gradient(low="white", high="#7CAE00") +
+  xlab("Time") +
+  ylab("Market") +
+  ggtitle("Trader Possible Market Choices over Time") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5,hjust = 5.0)) +
+  guides(fill = FALSE)
+
+
+```
+
+
+
